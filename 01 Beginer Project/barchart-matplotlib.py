@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt # type: ignore
 # data to display on plots 
-x = [3, 1, 3, 12, 2, 4, 4] 
+x = [1, 2, 3, 4, 5, 6, 7] 
 y = [3, 2, 1, 4, 5, 6, 7] 
 
 # This will plot a simple bar chart
-plt.bar(x, y)
+plt.plot(x, y)
 
 # Title to the plot
-plt.title("Bar Chart")
+plt.title("line Chart")
 
 # Adding the legends
-plt.legend(["bar"])
+plt.legend(["line"])
 plt.show()

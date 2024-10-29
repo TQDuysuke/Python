@@ -1,27 +1,61 @@
+import cv2
 import tensorflow as tf
-from tensorflow import keras
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 import numpy as np
 
-# Dữ liệu cố định
-X_train = np.array([[10], [20], [30], [40], [60], [70], [80], [90], [100]], dtype=np.float32)
-y_train = (X_train > 50).astype(int)  # Gán nhãn 1 nếu giá trị > 50, ngược lại 0
+# Load pre-trained face and eye detectors from OpenCV
+face_detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+eye_detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 
-# Xây dựng mô hình
-model = keras.Sequential([
-    keras.layers.Dense(10, activation='relu', input_shape=(1,)),
-    keras.layers.Dense(1, activation='sigmoid')
-])
+# Load the pre-trained model for face detection
+model = MobileNetV2(weights="imagenet", include_top=False)
 
-# Biên dịch mô hình
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+def detect_faces(frame):
+    # Convert frame to grayscale (required for OpenCV face detector)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
+    return faces
 
-# Huấn luyện mô hình
-model.fit(X_train, y_train, epochs=5000)
+def detect_eyes(face):
+    gray_face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+    eyes = eye_detector.detectMultiScale(gray_face, scaleFactor=1.1, minNeighbors=10, minSize=(20, 20))
+    return eyes
 
-# Chuyển đổi mô hình TensorFlow sang TensorFlow Lite
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
+def preprocess_face(face_image):
+    face_image = cv2.resize(face_image, (224, 224))
+    face_image = img_to_array(face_image)
+    face_image = preprocess_input(face_image)
+    face_image = np.expand_dims(face_image, axis=0)
+    return face_image
 
-# Lưu mô hình TensorFlow Lite
-with open('model.tflite', 'wb') as f:
-    f.write(tflite_model)
+# Open video capture (0 for default camera)
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    faces = detect_faces(frame)
+    for (x, y, w, h) in faces:
+        face = frame[y:y + h, x:x + w]
+        preprocessed_face = preprocess_face(face)
+        predictions = model.predict(preprocessed_face)
+
+        # Draw rectangle around the face
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        # Detect and draw rectangles around eyes within the detected face
+        eyes = detect_eyes(face)
+        for (ex, ey, ew, eh) in eyes:
+            cv2.rectangle(face, (ex, ey), (ex + ew, ey + eh), (255, 0, 0), 2)
+
+    cv2.imshow('Face and Eye Detection', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
