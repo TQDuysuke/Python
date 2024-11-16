@@ -1,5 +1,5 @@
-import pandas as pd
-import matplotlib.pyplot as plt
+import pandas as pd # đọc file csv
+import matplotlib.pyplot as plt # vẽ biểu đồ
 
 # Đọc dữ liệu từ tệp CSV
 df = pd.read_csv('ecg tran duy 19092024 1st.csv', header=None, names=['ADC Value'])
@@ -11,7 +11,7 @@ Vref = 3.3
 df['Voltage (mV)'] = (df['ADC Value'] / 4095) * Vref * 1000
 
 # Số lượng mẫu cố định
-num_samples = 1200
+num_samples = 500
 
 # Lấy 500 mẫu đầu tiên
 values = df['Voltage (mV)'][:num_samples].tolist()
@@ -22,7 +22,7 @@ times = [i * 2 for i in range(len(values))]
 # Vẽ biểu đồ
 plt.figure(figsize=(10, 5))
 plt.plot(times, values, linestyle='-', color='blue', label='Voltage (mV)')
-plt.title('Biểu đồ tín hiệu ECG của' + 'Trần Quốc Duy - 19/09/2024', fontsize=14)
+plt.title('Biểu đồ tín hiệu ECG của ' + 'Trần Quốc Duy - 29/10/2024', fontsize=14)
 plt.xlabel('Thời gian (ms)')
 plt.ylabel('Điện áp (mV)')
 plt.legend()
