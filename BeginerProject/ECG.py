@@ -2,7 +2,7 @@ import pandas as pd # đọc file csv
 import matplotlib.pyplot as plt # vẽ biểu đồ
 
 # Đọc dữ liệu từ tệp CSV
-df = pd.read_csv('ecg tran duy 19092024 1st.csv', header=None, names=['ADC Value'])
+df = pd.read_csv('file1.csv', header=None, names=['ADC Value'])
 
 # Điện áp tham chiếu
 Vref = 3.3
@@ -11,7 +11,7 @@ Vref = 3.3
 df['Voltage (mV)'] = (df['ADC Value'] / 4095) * Vref * 1000
 
 # Số lượng mẫu cố định
-num_samples = 500
+num_samples = 100000
 
 # Lấy 500 mẫu đầu tiên
 values = df['Voltage (mV)'][:num_samples].tolist()

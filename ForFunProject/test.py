@@ -3,7 +3,7 @@ import csv
 
 # Đọc dữ liệu từ file sample.csv
 data_list = []
-with open('sample.csv', 'r') as file:
+with open('file1.csv', 'r') as file:
     reader = csv.reader(file)
     for row in reader:
         for value in row:   
